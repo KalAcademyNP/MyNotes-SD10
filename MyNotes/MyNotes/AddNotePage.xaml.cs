@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyNotes.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,30 +14,45 @@ namespace MyNotes
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AddNotePage : ContentPage
     {
-        string fileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "notes.txt");
         public AddNotePage()
         {
             InitializeComponent();
+        }
 
-            if (File.Exists(fileName))
+        protected override void OnAppearing()
+        {
+            var note = (Note)BindingContext;
+            if (!string.IsNullOrEmpty(note.FileName))
             {
-                editor.Text = File.ReadAllText(fileName);
+                editor.Text = File.ReadAllText(note.FileName);
             }
         }
 
-        private void OnSaveButtonClicked(object sender, EventArgs e)
+        private async void OnSaveButtonClicked(object sender, EventArgs e)
         {
-            File.WriteAllText(fileName, editor.Text);
+            var note = (Note)BindingContext;
+            if (string.IsNullOrEmpty(note.FileName))
+            {
+                //Create a new file
+                note.FileName = Path.Combine(Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData),
+                    $"{Path.GetRandomFileName()}.notes.txt"
+                    );
+
+            }
+            File.WriteAllText(note.FileName, editor.Text);
+            await Navigation.PopModalAsync();
         }
 
-        private void OnDeleteButtonClicked(object sender, EventArgs e)
+        private async void OnDeleteButtonClicked(object sender, EventArgs e)
         {
-            if (File.Exists(fileName))
+            var note = (Note)BindingContext;
+            if (File.Exists(note.FileName))
             {
-                File.Delete(fileName);
+                File.Delete(note.FileName);
             }
             editor.Text = string.Empty;
+            await Navigation.PopModalAsync();
         }
     }
 }

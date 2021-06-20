@@ -10,8 +10,7 @@ namespace MyNotes
         {
             InitializeComponent();
 
-            //MainPage = new MainPage();
-            MainPage = new AddNotePage();
+            MainPage = new MainPage();
         }
 
         protected override void OnStart()
